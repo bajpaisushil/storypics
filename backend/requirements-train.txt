@@ -1,0 +1,4 @@
+# Extra dependencies for dataset preparation, training and evaluation
+-r requirements.txt
+pyarrow
+tqdm

@@ -1,0 +1,24 @@
+# StoryPix backend runtime dependencies (Python 3.11-3.13; developed on 3.12)
+torch==2.15.0
+diffusers==0.42.1
+transformers==5.22.2
+accelerate==1.15.0
+peft==0.21.2
+safetensors==0.8.0
+huggingface-hub==2.4.0
+fastapi==0.162.4
+uvicorn[standard]==0.54.0
+pydantic==2.14.3
+pydantic-settings==2.16.2
+python-multipart==0.0.33
+httpx==0.28.1
+pillow==13.0.0
+opencv-python-headless==5.0.0.93
+numpy
+reportlab==5.1.0
+spacy==3.8.18
+lemminflect==0.2.3
+sentencepiece==0.2.3  # SigLIP tokenizer (evaluator)
+protobuf==7.36.2  # SigLIP tokenizer (evaluator)
+# spaCy English pipeline (MIT). Installed from the official release wheel.
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl

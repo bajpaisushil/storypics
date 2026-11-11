@@ -1,0 +1,20 @@
+{
+  "test_images": 165,
+  "target": "ImageRewardDB alignment rating",
+  "results": {
+    "zero-shot SigLIP cosine": {
+      "spearman": -0.0886,
+      "pearson": 0.042,
+      "pairwise_acc_within_prompt": 0.5479
+    },
+    "Model C (trained head)": {
+      "spearman": 0.2508,
+      "pearson": 0.3001,
+      "pairwise_acc_within_prompt": 0.6048
+    }
+  },
+  "correct_vs_random_prompt_accuracy": {
+    "Model C (trained head)": 0.9333,
+    "zero-shot SigLIP cosine": 0.9515
+  }
+}

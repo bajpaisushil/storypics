@@ -1,0 +1,104 @@
+{
+  "task": "quality",
+  "target": "fidelity",
+  "train_images": 693,
+  "dev_images": 160,
+  "parameters": 496653,
+  "best": {
+    "spearman": 0.4815,
+    "pairwise_acc": 0.6132,
+    "epoch": 14
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 0.3935,
+      "dev_spearman": 0.3734,
+      "dev_pairwise_acc": 0.5144
+    },
+    {
+      "epoch": 2,
+      "loss": 0.298,
+      "dev_spearman": 0.3867,
+      "dev_pairwise_acc": 0.5226
+    },
+    {
+      "epoch": 3,
+      "loss": 0.2157,
+      "dev_spearman": 0.3879,
+      "dev_pairwise_acc": 0.5679
+    },
+    {
+      "epoch": 4,
+      "loss": 0.1498,
+      "dev_spearman": 0.3662,
+      "dev_pairwise_acc": 0.6008
+    },
+    {
+      "epoch": 5,
+      "loss": 0.1149,
+      "dev_spearman": 0.3141,
+      "dev_pairwise_acc": 0.572
+    },
+    {
+      "epoch": 6,
+      "loss": 0.09,
+      "dev_spearman": 0.3949,
+      "dev_pairwise_acc": 0.6049
+    },
+    {
+      "epoch": 7,
+      "loss": 0.0832,
+      "dev_spearman": 0.4345,
+      "dev_pairwise_acc": 0.6173
+    },
+    {
+      "epoch": 8,
+      "loss": 0.0622,
+      "dev_spearman": 0.4354,
+      "dev_pairwise_acc": 0.6091
+    },
+    {
+      "epoch": 9,
+      "loss": 0.0612,
+      "dev_spearman": 0.4095,
+      "dev_pairwise_acc": 0.6379
+    },
+    {
+      "epoch": 10,
+      "loss": 0.0542,
+      "dev_spearman": 0.4082,
+      "dev_pairwise_acc": 0.6379
+    },
+    {
+      "epoch": 11,
+      "loss": 0.0517,
+      "dev_spearman": 0.4265,
+      "dev_pairwise_acc": 0.6132
+    },
+    {
+      "epoch": 12,
+      "loss": 0.0456,
+      "dev_spearman": 0.4689,
+      "dev_pairwise_acc": 0.6255
+    },
+    {
+      "epoch": 13,
+      "loss": 0.0376,
+      "dev_spearman": 0.4708,
+      "dev_pairwise_acc": 0.6296
+    },
+    {
+      "epoch": 14,
+      "loss": 0.0402,
+      "dev_spearman": 0.4815,
+      "dev_pairwise_acc": 0.6132
+    },
+    {
+      "epoch": 15,
+      "loss": 0.0365,
+      "dev_spearman": 0.4374,
+      "dev_pairwise_acc": 0.6379
+    }
+  ]
+}

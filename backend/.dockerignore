@@ -1,0 +1,9 @@
+.venv
+data
+out
+training
+tests
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.env

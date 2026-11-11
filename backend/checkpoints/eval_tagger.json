@@ -1,0 +1,50 @@
+{
+  "results": {
+    "litbank_test | Model B | CHAR": {
+      "precision": 0.787,
+      "recall": 0.778,
+      "f1": 0.783
+    },
+    "litbank_test | Model B | PLACE": {
+      "precision": 0.636,
+      "recall": 0.678,
+      "f1": 0.656
+    },
+    "litbank_test | Model B | all": {
+      "precision": 0.741,
+      "recall": 0.749,
+      "f1": 0.745
+    },
+    "children_gold | rules | exact": {
+      "precision": 0.93,
+      "recall": 0.88,
+      "f1": 0.904
+    },
+    "children_gold | rules | overlap": {
+      "precision": 0.944,
+      "recall": 0.893,
+      "f1": 0.918
+    },
+    "children_gold | Model B | exact": {
+      "precision": 0.972,
+      "recall": 0.933,
+      "f1": 0.952
+    },
+    "children_gold | Model B | overlap": {
+      "precision": 0.972,
+      "recall": 0.933,
+      "f1": 0.952
+    },
+    "children_gold | Model B + lexicon (production) | exact": {
+      "precision": 0.974,
+      "recall": 0.987,
+      "f1": 0.98
+    },
+    "children_gold | Model B + lexicon (production) | overlap": {
+      "precision": 0.974,
+      "recall": 0.987,
+      "f1": 0.98
+    }
+  },
+  "gold_mentions": 75
+}

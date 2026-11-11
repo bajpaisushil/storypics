@@ -1,0 +1,184 @@
+# StoryPix
+
+**Turn a written story into a consistently illustrated storybook, with open models and no paid AI APIs.**
+
+Write or paste a story, pick an illustration style, and StoryPix works out the scenes and the cast. It gives each
+character a stable look and illustrates the story scene by scene, keeping characters recognisable through
+reference-image conditioning. You can regenerate any scene with instructions ("make the hen happier"), compare
+versions, and download single images, a ZIP or a PDF storybook.
+
+Story understanding runs on four small PyTorch models trained in this repository. Images come from open diffusion
+models run by StoryPix's own backend through Hugging Face Diffusers: SDXL-Lightning on an Apple-silicon or NVIDIA GPU,
+or LCM-DreamShaper on a CPU-only server such as the free Hugging Face Space the public deployment uses.
+
+```
+Story ──▶ event units ──▶ Model A: scene boundaries ──▶ scenes (actions · setting · time · mood · composition)
+      └─▶ Model B: character & place tagger ──▶ coreference ──▶ character profiles (+ uploaded references)
+                                                                    │
+     style instructions ──▶ token-aware prompt builder ◀────────────┘
+                                   │
+      character anchors ──▶ SDXL-Lightning (GPU) or LCM-DreamShaper (CPU) + IP-Adapter Plus (masked) ──▶ scene images
+                                   │
+          Model C: alignment · Model D: quality · DINOv2 identity consistency ──▶ auto-retry / best-of-k
+                                   │
+                         ordered storybook ──▶ PNG · ZIP (+ manifest) · PDF
+```
+
+## Highlights
+
+- **Real scene understanding, not sentence counting.** Sentences are split into clause-level events with a dependency
+  parse, and a trained Transformer boundary model (Model A) groups them into visual moments. On a hand-annotated gold
+  set it beats the labelling-function heuristic, TextTiling and "every two sentences" (F1 0.678 vs 0.545 / 0.261 /
+  0.429).
+- **A consistent cast.** A trained BiLSTM-CRF tagger (Model B, F1 0.952 on children's stories, 0.980 with its lexicon
+  backstop) finds characters and places, including first-person narrators. Coreference resolution and curated appearance priors then turn "a hen" into a canonical profile ("a hen with
+  warm orange-brown feathers, a small red comb…"), and explicit story details ("a girl with red hair") always win.
+- **Reference-conditioned images.** Each recurring character gets an anchor portrait first. Every scene is then
+  conditioned on the anchors of the characters in it, through **IP-Adapter attention masks** that keep each reference
+  in its own region. Prompts longer than CLIP's 77 tokens are chunk-encoded rather than silently truncated.
+- **Measured quality.** Generated images are scored for text alignment (Model C), quality (Model D) and per-character
+  identity similarity; weak scenes are automatically re-drawn with a new seed.
+- **Production workflow.** Asynchronous jobs with SQLite persistence, live progress over Server-Sent Events,
+  cancel/resume, per-scene regeneration with version history, and reproducible seeds and manifests.
+
+## Deployment (free)
+
+| Part | Where | Notes |
+|---|---|---|
+| Web app (Next.js) | Vercel, deployed from this GitHub repo (root directory `frontend`) | static; `NEXT_PUBLIC_API_URL` points at the backend |
+| Backend + all models | free Hugging Face Space, Docker SDK, CPU basic (2 vCPU, 16 GB) | `backend/Dockerfile`; deploy with `python scripts/deploy_space.py` |
+
+Nothing heavy is installed on a developer's machine. The Space downloads its model weights (≈ 8 GB) on Hugging
+Face's own infrastructure at first start. The trade-off is speed: a free CPU draws each 512 px image in tens of
+seconds rather than seconds (measured numbers in [PERFORMANCE.md](docs/PERFORMANCE.md)). A free Space also sleeps
+when idle, so the first visit after a while waits for it to wake; the web app says so instead of failing.
+
+To deploy your own copy:
+
+```bash
+cd backend && .venv/bin/hf auth login                     # a Hugging Face token with write access
+.venv/bin/python scripts/deploy_space.py --cors-regex 'https://<your-vercel-project>.*\.vercel\.app'
+# then import the GitHub repo in Vercel: root directory "frontend", NEXT_PUBLIC_API_URL=<the printed API URL>
+```
+
+## Run it locally (optional; needs a GPU or Apple silicon)
+
+Requirements: Python 3.11–3.13 (developed on 3.12 via [uv](https://github.com/astral-sh/uv)), Node 20+, about 20 GB
+of free disk, and an Apple-silicon Mac with 16 GB or an NVIDIA GPU with 12 GB or more (see [Hardware](#hardware)).
+
+```bash
+make setup     # Python venv + backend deps, npm install
+make models    # one-time download of ~12 GB of open model weights (resumable)
+make backend   # API on http://localhost:8000   (docs at /docs)
+make frontend  # app on http://localhost:3000
+```
+
+Without `make`:
+
+```bash
+cd backend
+uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt
+.venv/bin/python scripts/download_models.py
+.venv/bin/uvicorn app.main:app --port 8000
+# second terminal
+cd frontend && npm install && npm run dev
+```
+
+Configuration is optional; see [`backend/.env.example`](backend/.env.example) (resolution, Lightning steps, retries, CORS)
+and [`frontend/.env.example`](frontend/.env.example) (`NEXT_PUBLIC_API_URL`).
+
+**Command line (same pipeline, no web UI):**
+
+```bash
+cd backend
+.venv/bin/python -m app.cli analyze story.txt --scenes 5           # story understanding only, < 1 s
+.venv/bin/python -m app.cli generate story.txt --style watercolor --out out/   # full storybook → out/storybook.pdf
+```
+
+## Hardware
+
+| Machine | Works? | Notes |
+|---|---|---|
+| Apple silicon, 16 GB (M1–M4) | ✅ primary target | SDXL + Lightning (8 steps) on MPS; see [PERFORMANCE.md](docs/PERFORMANCE.md) for measured speed and memory |
+| Apple silicon, 8 GB | ⚠️ | set `STORYPIX_IMAGE_RESOLUTION=768` and `STORYPIX_LIGHTNING_STEPS=4`; expect memory swapping |
+| NVIDIA ≥ 12 GB VRAM | ✅ | defaults to the "quality" profile (28 steps, CFG, negative prompts) |
+| CPU-only server (e.g. free HF Space, 2 vCPU / 16 GB) | ✅ deployment target | `lcm` profile: LCM-DreamShaper v7, 4 steps, 512 px, IP-Adapter Plus SD1.5, safety checker |
+| CPU-only laptop | ⚠️ | the `lcm` profile works, but SDXL profiles take minutes per image |
+| No suitable GPU | ✅ notebook | [`notebooks/StoryPix_free_GPU.ipynb`](notebooks/StoryPix_free_GPU.ipynb) runs the batch pipeline on a free Colab/Kaggle T4 |
+
+Story analysis and all four custom models run on any CPU in well under a second per story.
+
+## Custom models
+
+| Model | Architecture (trained layers on a frozen encoder) | Data | Result |
+|---|---|---|---|
+| **A** Scene boundaries | Transformer over MiniLM unit embeddings + discourse features | TinyStories, weak labels | gold F1 **0.678** · Pk 0.259 (heuristic 0.545 · 0.336) |
+| **B** Characters & places | BiLSTM-CRF over MiniLM word states + casing/POS | LitBank (gold) + TinyStories (silver) | LitBank test F1 **0.745**; children's gold **0.952** (rules 0.904) |
+| **C** Scene–image alignment | interaction MLP over SigLIP text/image embeddings | ImageRewardDB alignment ratings (1,018-image subset) | Spearman **0.25** vs zero-shot SigLIP −0.09 |
+| **D** Image quality | fusion MLP over SigLIP + DINOv2 + OpenCV statistics | ImageRewardDB fidelity ratings (1,018-image subset) | Spearman **0.42** vs OpenCV baseline −0.03 |
+
+Architectures, tensor shapes, losses, training details, baselines and dataset licences are in
+**[docs/MODELS.md](docs/MODELS.md)**. To reproduce everything: `make data && make train && make evaluate`.
+
+## Image generation stack
+
+| Component | Licence | Role |
+|---|---|---|
+| Stable Diffusion XL base 1.0 | CreativeML OpenRAIL++-M | text-to-image backbone |
+| SDXL-Lightning 4/8-step LoRA (ByteDance) | OpenRAIL++ | fast sampling on Apple silicon |
+| IP-Adapter Plus SDXL, ViT-H (h94) | Apache-2.0 | character reference conditioning |
+| SDXL VAE fp16-fix | MIT | stable fp16 decoding |
+| LCM-DreamShaper v7 (SD1.5 family) | MIT | CPU-friendly 4-step generator (`lcm` profile, used by the deployment) |
+| IP-Adapter Plus SD1.5, ViT-H (h94) | Apache-2.0 | character references for the `lcm` profile |
+| Stable Diffusion safety checker | CreativeML OpenRAIL-M | blocks unsafe images on the public deployment |
+| SigLIP base · DINOv2-small · all-MiniLM-L6-v2 | Apache-2.0 | frozen encoders for the custom models |
+
+The model selection, including rejected options and why (SDXL-Turbo is non-commercial; FLUX and Z-Image are too large
+for 16 GB or a free CPU), is documented in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Project layout
+
+```
+backend/
+  app/            FastAPI app: api/ routes · schemas/ (Pydantic contracts) · models/ (PyTorch) · services/ (pipeline)
+  training/       dataset download/preparation, training scripts, evaluate.py, annotations/ (gold sets)
+  checkpoints/    trained weights + metrics + evaluation reports
+  worker/         optional generation worker for a GPU machine you own
+  scripts/        model download, Hugging Face Space deployment
+  Dockerfile      CPU image used by the Space
+  tests/          pytest: models, pipeline stages, API workflow
+frontend/         Next.js 16 · TypeScript · Tailwind · shadcn/ui
+notebooks/        free-GPU batch notebook
+docs/             ARCHITECTURE · MODELS · API · PERFORMANCE
+```
+
+## Testing
+
+```bash
+(cd backend && .venv/bin/python -m pytest -q)       # 33 tests: CRF vs brute force, pipeline stages, job lifecycle
+(cd backend && STORYPIX_RUN_INTEGRATION=1 .venv/bin/python -m pytest -k integration)  # +5: real Diffusers SDXL + LCM code, tiny models
+(cd frontend && npm run lint && npm test && npm run build)
+(cd frontend && node e2e/smoke.mjs ui)              # browser test in your installed Chrome (`full` = real storybook)
+```
+
+API tests use a clearly labelled **test double** for the image generator (`tests/conftest.py`), so the job workflow
+can be tested without a GPU. The application never substitutes placeholder images: if the image model is
+unavailable, generation requests fail with an explanation of how to fix it.
+
+## Limitations
+
+- Character consistency is strong for distinct characters but not perfect. Two characters of the same species, or very
+  crowded scenes, are harder. Masked IP-Adapter conditioning assumes a left/right/thirds layout.
+- Story understanding is tuned for narrative fiction in English, especially children's stories.
+- Gold evaluation sets are small and single-annotated (see `backend/training/annotations/README.md`).
+- The free CPU deployment is slow (tens of seconds per image) and its 512 px LCM-DreamShaper output is less detailed
+  than SDXL; a free Space sleeps when idle and loses generated storybooks when it restarts (no persistent disk).
+- Models C and D were trained on a 1,018-image subset of ImageRewardDB; treat their scores as indicative.
+- Generated images follow the use restrictions of the CreativeML OpenRAIL licences.
+
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): design, model and dataset selection, hardware, MVP scope
+- [docs/MODELS.md](docs/MODELS.md): the four custom models in detail
+- [docs/API.md](docs/API.md): REST + SSE reference (interactive docs at `/docs`)
+- [docs/PERFORMANCE.md](docs/PERFORMANCE.md): measured latency and memory

@@ -1,0 +1,104 @@
+{
+  "stories": 38,
+  "gold_boundaries": 124,
+  "misaligned_gold_offsets": 0,
+  "results": {
+    "every 2 sentences | auto": {
+      "precision": 0.356,
+      "recall": 0.54,
+      "f1": 0.429,
+      "f1_tol1": 0.776,
+      "pk": 0.449,
+      "windowdiff": 0.521,
+      "by_source_f1": {
+        "tinystories": 0.327,
+        "written+fables": 0.698
+      }
+    },
+    "uniform spacing | oracle-N": {
+      "precision": 0.347,
+      "recall": 0.347,
+      "f1": 0.347,
+      "f1_tol1": 0.79,
+      "pk": 0.371,
+      "windowdiff": 0.401,
+      "by_source_f1": {
+        "tinystories": 0.234,
+        "written+fables": 0.532
+      }
+    },
+    "TextTiling (MiniLM) | auto": {
+      "precision": 0.223,
+      "recall": 0.315,
+      "f1": 0.261,
+      "f1_tol1": 0.736,
+      "pk": 0.494,
+      "windowdiff": 0.613,
+      "by_source_f1": {
+        "tinystories": 0.256,
+        "written+fables": 0.273
+      }
+    },
+    "TextTiling (MiniLM) | oracle-N": {
+      "precision": 0.315,
+      "recall": 0.315,
+      "f1": 0.315,
+      "f1_tol1": 0.702,
+      "pk": 0.449,
+      "windowdiff": 0.516,
+      "by_source_f1": {
+        "tinystories": 0.26,
+        "written+fables": 0.404
+      }
+    },
+    "heuristic (labelling functions) | auto": {
+      "precision": 0.671,
+      "recall": 0.46,
+      "f1": 0.545,
+      "f1_tol1": 0.66,
+      "pk": 0.336,
+      "windowdiff": 0.387,
+      "by_source_f1": {
+        "tinystories": 0.5,
+        "written+fables": 0.617
+      }
+    },
+    "heuristic (labelling functions) | oracle-N": {
+      "precision": 0.613,
+      "recall": 0.613,
+      "f1": 0.613,
+      "f1_tol1": 0.798,
+      "pk": 0.283,
+      "windowdiff": 0.331,
+      "by_source_f1": {
+        "tinystories": 0.558,
+        "written+fables": 0.702
+      }
+    },
+    "Model A (trained) | auto": {
+      "precision": 0.704,
+      "recall": 0.653,
+      "f1": 0.678,
+      "f1_tol1": 0.77,
+      "pk": 0.259,
+      "windowdiff": 0.328,
+      "by_source_f1": {
+        "tinystories": 0.667,
+        "written+fables": 0.698
+      }
+    },
+    "Model A (trained) | oracle-N": {
+      "precision": 0.685,
+      "recall": 0.685,
+      "f1": 0.685,
+      "f1_tol1": 0.831,
+      "pk": 0.238,
+      "windowdiff": 0.272,
+      "by_source_f1": {
+        "tinystories": 0.636,
+        "written+fables": 0.766
+      }
+    }
+  },
+  "notes": "auto = system chooses the number of scenes; oracle-N = given the gold scene count. Pk/WindowDiff: lower is better."
+}

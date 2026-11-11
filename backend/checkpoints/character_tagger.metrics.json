@@ -1,0 +1,213 @@
+{
+  "model": "MentionTagger (BiLSTM-CRF)",
+  "parameters": 951776,
+  "best": {
+    "score": 0.8317,
+    "epoch": 10,
+    "litbank_dev": {
+      "f1": 0.6995,
+      "f1_CHAR": 0.7505,
+      "f1_PLACE": 0.5949
+    },
+    "silver_dev": {
+      "f1": 0.9639,
+      "f1_CHAR": 0.9695,
+      "f1_PLACE": 0.926
+    }
+  },
+  "litbank_test": {
+    "f1": 0.7452,
+    "f1_CHAR": 0.7827,
+    "f1_PLACE": 0.6561
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 1.8105,
+      "litbank_dev": {
+        "f1": 0.6445,
+        "f1_CHAR": 0.7057,
+        "f1_PLACE": 0.498
+      },
+      "silver_dev": {
+        "f1": 0.9206,
+        "f1_CHAR": 0.9308,
+        "f1_PLACE": 0.8496
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 2,
+      "loss": 1.1305,
+      "litbank_dev": {
+        "f1": 0.6819,
+        "f1_CHAR": 0.7392,
+        "f1_PLACE": 0.5623
+      },
+      "silver_dev": {
+        "f1": 0.9307,
+        "f1_CHAR": 0.9398,
+        "f1_PLACE": 0.8697
+      },
+      "seconds": 10.8
+    },
+    {
+      "epoch": 3,
+      "loss": 0.9821,
+      "litbank_dev": {
+        "f1": 0.6799,
+        "f1_CHAR": 0.733,
+        "f1_PLACE": 0.5629
+      },
+      "silver_dev": {
+        "f1": 0.9478,
+        "f1_CHAR": 0.953,
+        "f1_PLACE": 0.9126
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 4,
+      "loss": 0.8345,
+      "litbank_dev": {
+        "f1": 0.6829,
+        "f1_CHAR": 0.738,
+        "f1_PLACE": 0.5626
+      },
+      "silver_dev": {
+        "f1": 0.9517,
+        "f1_CHAR": 0.9588,
+        "f1_PLACE": 0.9033
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 5,
+      "loss": 0.7191,
+      "litbank_dev": {
+        "f1": 0.6635,
+        "f1_CHAR": 0.7145,
+        "f1_PLACE": 0.5558
+      },
+      "silver_dev": {
+        "f1": 0.955,
+        "f1_CHAR": 0.9623,
+        "f1_PLACE": 0.9059
+      },
+      "seconds": 10.2
+    },
+    {
+      "epoch": 6,
+      "loss": 0.6048,
+      "litbank_dev": {
+        "f1": 0.6883,
+        "f1_CHAR": 0.746,
+        "f1_PLACE": 0.5643
+      },
+      "silver_dev": {
+        "f1": 0.9589,
+        "f1_CHAR": 0.9661,
+        "f1_PLACE": 0.9097
+      },
+      "seconds": 8.4
+    },
+    {
+      "epoch": 7,
+      "loss": 0.5108,
+      "litbank_dev": {
+        "f1": 0.6964,
+        "f1_CHAR": 0.7534,
+        "f1_PLACE": 0.5767
+      },
+      "silver_dev": {
+        "f1": 0.9593,
+        "f1_CHAR": 0.9666,
+        "f1_PLACE": 0.9102
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 8,
+      "loss": 0.4316,
+      "litbank_dev": {
+        "f1": 0.6912,
+        "f1_CHAR": 0.7467,
+        "f1_PLACE": 0.5793
+      },
+      "silver_dev": {
+        "f1": 0.9617,
+        "f1_CHAR": 0.9681,
+        "f1_PLACE": 0.9183
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 9,
+      "loss": 0.378,
+      "litbank_dev": {
+        "f1": 0.7007,
+        "f1_CHAR": 0.7521,
+        "f1_PLACE": 0.5928
+      },
+      "silver_dev": {
+        "f1": 0.9605,
+        "f1_CHAR": 0.966,
+        "f1_PLACE": 0.9233
+      },
+      "seconds": 8.4
+    },
+    {
+      "epoch": 10,
+      "loss": 0.3273,
+      "litbank_dev": {
+        "f1": 0.6995,
+        "f1_CHAR": 0.7505,
+        "f1_PLACE": 0.5949
+      },
+      "silver_dev": {
+        "f1": 0.9639,
+        "f1_CHAR": 0.9695,
+        "f1_PLACE": 0.926
+      },
+      "seconds": 8.4
+    },
+    {
+      "epoch": 11,
+      "loss": 0.2943,
+      "litbank_dev": {
+        "f1": 0.6996,
+        "f1_CHAR": 0.754,
+        "f1_PLACE": 0.5889
+      },
+      "silver_dev": {
+        "f1": 0.9634,
+        "f1_CHAR": 0.9691,
+        "f1_PLACE": 0.9247
+      },
+      "seconds": 8.5
+    },
+    {
+      "epoch": 12,
+      "loss": 0.2875,
+      "litbank_dev": {
+        "f1": 0.7001,
+        "f1_CHAR": 0.7534,
+        "f1_PLACE": 0.5909
+      },
+      "silver_dev": {
+        "f1": 0.9631,
+        "f1_CHAR": 0.9687,
+        "f1_PLACE": 0.9254
+      },
+      "seconds": 8.4
+    }
+  ],
+  "args": {
+    "epochs": "12",
+    "batch_size": "32",
+    "lr": "0.002",
+    "silver_per_epoch": "8000",
+    "seed": "13",
+    "out": "/Users/sushilbajpai/Desktop/Projects/storypics/backend/checkpoints/character_tagger.pt"
+  }
+}

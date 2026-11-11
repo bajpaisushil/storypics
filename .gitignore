@@ -1,0 +1,30 @@
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+backend/.env
+# local runtime state: jobs database, generated images, uploads
+backend/data/
+# downloaded datasets + processed features (re-create with backend/training/datasets/*)
+backend/training/data/
+backend/out/
+*.part
+
+# --- Node / frontend ---
+node_modules/
+.next/
+out/
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# --- OS / editors ---
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,104 @@
+{
+  "task": "alignment",
+  "target": "alignment",
+  "train_images": 693,
+  "dev_images": 160,
+  "parameters": 1181569,
+  "best": {
+    "spearman": 0.4041,
+    "pairwise_acc": 0.6877,
+    "epoch": 2
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 0.7128,
+      "dev_spearman": 0.0246,
+      "dev_pairwise_acc": 0.6777
+    },
+    {
+      "epoch": 2,
+      "loss": 0.6725,
+      "dev_spearman": 0.4041,
+      "dev_pairwise_acc": 0.6877
+    },
+    {
+      "epoch": 3,
+      "loss": 0.6393,
+      "dev_spearman": 0.3839,
+      "dev_pairwise_acc": 0.6744
+    },
+    {
+      "epoch": 4,
+      "loss": 0.5971,
+      "dev_spearman": 0.3603,
+      "dev_pairwise_acc": 0.6744
+    },
+    {
+      "epoch": 5,
+      "loss": 0.5369,
+      "dev_spearman": 0.3292,
+      "dev_pairwise_acc": 0.6811
+    },
+    {
+      "epoch": 6,
+      "loss": 0.4653,
+      "dev_spearman": 0.2856,
+      "dev_pairwise_acc": 0.6811
+    },
+    {
+      "epoch": 7,
+      "loss": 0.3969,
+      "dev_spearman": 0.2386,
+      "dev_pairwise_acc": 0.6578
+    },
+    {
+      "epoch": 8,
+      "loss": 0.3277,
+      "dev_spearman": 0.1987,
+      "dev_pairwise_acc": 0.6578
+    },
+    {
+      "epoch": 9,
+      "loss": 0.2522,
+      "dev_spearman": 0.2484,
+      "dev_pairwise_acc": 0.6611
+    },
+    {
+      "epoch": 10,
+      "loss": 0.2268,
+      "dev_spearman": 0.2057,
+      "dev_pairwise_acc": 0.6478
+    },
+    {
+      "epoch": 11,
+      "loss": 0.1773,
+      "dev_spearman": 0.17,
+      "dev_pairwise_acc": 0.6578
+    },
+    {
+      "epoch": 12,
+      "loss": 0.1689,
+      "dev_spearman": 0.2299,
+      "dev_pairwise_acc": 0.6578
+    },
+    {
+      "epoch": 13,
+      "loss": 0.1722,
+      "dev_spearman": 0.2405,
+      "dev_pairwise_acc": 0.6545
+    },
+    {
+      "epoch": 14,
+      "loss": 0.1448,
+      "dev_spearman": 0.2528,
+      "dev_pairwise_acc": 0.6478
+    },
+    {
+      "epoch": 15,
+      "loss": 0.1249,
+      "dev_spearman": 0.2155,
+      "dev_pairwise_acc": 0.6512
+    }
+  ]
+}

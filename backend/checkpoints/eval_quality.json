@@ -1,0 +1,16 @@
+{
+  "test_images": 165,
+  "target": "ImageRewardDB fidelity rating",
+  "results": {
+    "Model D (trained head)": {
+      "spearman": 0.4229,
+      "pearson": 0.481,
+      "pairwise_acc_within_prompt": 0.6809
+    },
+    "OpenCV statistics (linear baseline)": {
+      "spearman": -0.0246,
+      "pearson": 0.0634,
+      "pairwise_acc_within_prompt": 0.4708
+    }
+  }
+}
