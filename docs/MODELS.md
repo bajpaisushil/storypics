@@ -217,6 +217,27 @@ within-prompt Bradley–Terry ranking loss. **Baseline.** A linear model on the 
 
 ---
 
+## Ablation: how to condition scenes with several characters
+
+Run on the deployed CPU profile (LCM-DreamShaper v7 + IP-Adapter Plus SD1.5, 640×480, 4 steps): two two-character
+scenes from the example story ("The hen meets the cow", "Exploring the farm"), two seeds each, identical prompts.
+
+![Ablation grid](images/ablation_multi_character.jpg)
+
+| Variant | What happened |
+|---|---|
+| A — references masked to overlapping halves, strength 0.65 (first design) | the hen and cow merge into hen-cow hybrids; one sample is a single fused creature |
+| **B — masks with a central gap, strength 0.45 (adopted)** | **two distinct characters, each recognisably its anchor** |
+| C — both references over the whole canvas, strength 0.45 | both animals become identical hybrids (the references are averaged) |
+| D — text only (descriptors in the prompt, no references) | no consistency at all: tiny or wrong animals dominated by scenery |
+| E — only the main character's reference | two hens; the cow disappears |
+
+Text descriptions alone do not keep characters consistent (D), and references help only when each is confined to its
+own region with a gap and moderate strength (B vs A/C). With the adopted settings, two of the four two-character
+scenes in the example storybook are clean and two still show partial attribute bleeding on the smaller SD1.5-class
+model, as does a third character without an anchor (the rabbit). SDXL on a GPU, the same code with
+`modal deploy modal_app.py`, is the stronger option for crowded scenes.
+
 ## Character identity consistency (not a trained model)
 
 StoryPix measures whether a character still looks like its reference portrait. It computes cosine similarity
