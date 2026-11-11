@@ -62,6 +62,8 @@ def test_full_job_lifecycle_and_exports(make_client):
     for scene in job["scenes"]:
         assert scene["selected_version"] == "v1"
         assert client.get(scene["versions"][0]["url"]).status_code == 200
+        preview = client.get(scene["versions"][0]["preview_url"])
+        assert preview.status_code == 200 and preview.content[8:12] == b"WEBP"  # light image for the viewer
 
     z = client.get(f"/api/jobs/{job['id']}/export.zip")
     assert z.status_code == 200

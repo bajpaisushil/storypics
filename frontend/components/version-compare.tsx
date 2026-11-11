@@ -46,10 +46,10 @@ export function VersionCompare({ job, scene, onJob }: { job: Job; scene: SceneSt
         style={{ aspectRatio: `${job.settings.width} / ${job.settings.height}`, maxWidth: 720 }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- backend image */}
-        <img src={mediaUrl(after.url)} alt={`After: ${after.id}`} className="absolute inset-0 size-full object-cover" />
+        <img src={mediaUrl(after.preview_url ?? after.url)} alt={`After: ${after.id}`} className="absolute inset-0 size-full object-cover" />
         {/* eslint-disable-next-line @next/next/no-img-element -- backend image */}
         <img
-          src={mediaUrl(before.url)}
+          src={mediaUrl(before.preview_url ?? before.url)}
           alt={`Before: ${before.id}`}
           className="absolute inset-0 size-full object-cover"
           style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}

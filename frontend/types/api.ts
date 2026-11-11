@@ -61,6 +61,8 @@ export interface ImageVersion {
   /** root-relative backend path, e.g. /media/<job>/scene_01_v1.png */
   url: string;
   thumb_url: string;
+  /** full-size WebP for on-screen viewing (url is the lossless PNG used for downloads) */
+  preview_url?: string | null;
   file: string;
   created_at: string;
   mode: VersionMode;

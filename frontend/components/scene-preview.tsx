@@ -56,13 +56,23 @@ export function ScenePreview({ job, scene, onPrev, onNext, onJob }: Props) {
           style={{ aspectRatio: `${width} / ${height}`, maxWidth: `calc(min(68vh, 760px) * ${width / height})` }}
         >
           {version ? (
-            // eslint-disable-next-line @next/next/no-img-element -- backend-served image
-            <img
-              key={version.id}
-              src={mediaUrl(version.url)}
-              alt={`Scene ${scene.index}: ${scene.summary}`}
-              className="size-full object-cover"
-            />
+            <>
+              {/* the cached thumbnail, blurred, shows instantly while the full image loads */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- backend-served image */}
+              <img
+                aria-hidden
+                alt=""
+                src={mediaUrl(version.thumb_url)}
+                className="absolute inset-0 size-full scale-105 object-cover blur-md"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element -- backend-served image */}
+              <img
+                key={version.id}
+                src={mediaUrl(version.preview_url ?? version.url)}
+                alt={`Scene ${scene.index}: ${scene.summary}`}
+                className="relative size-full object-cover"
+              />
+            </>
           ) : (
             <div className="absolute inset-0 grid place-items-center p-6 text-center">
               {scene.status === "generating" && (

@@ -417,11 +417,12 @@ class JobManager:
     ) -> ImageVersion:
         version_id = f"v{len(existing) + 1}"
         rel = Path(job.id) / f"{stem}_{version_id}.png"
-        _original, thumb = save_with_thumb(image, self.media_dir / rel)
+        _original, preview, thumb = save_with_thumb(image, self.media_dir / rel)
         return ImageVersion(
             id=version_id,
             url=f"/media/{rel.as_posix()}",
             thumb_url=f"/media/{(rel.parent / thumb.name).as_posix()}",
+            preview_url=f"/media/{(rel.parent / preview.name).as_posix()}",
             file=rel.as_posix(),
             mode=mode,
             seed=info.seed,

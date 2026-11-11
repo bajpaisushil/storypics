@@ -97,7 +97,8 @@ try {
     }
 
     step("regenerate scene 2 with an instruction, keeping the composition");
-    await page.getByLabel("Next scene").click();
+    // the viewer follows generation to the last scene; pick scene 2 from the thumbnail strip
+    await page.getByRole("navigation", { name: "Scenes" }).getByRole("button", { name: /^Scene 2:/ }).click();
     await page.getByRole("button", { name: /^Regenerate$/ }).first().click();
     await page.getByRole("dialog").getByRole("textbox").fill("Make the hen happier");
     await page.getByRole("dialog").getByText("Keep composition").click();

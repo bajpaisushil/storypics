@@ -16,15 +16,17 @@ class InvalidImage(ValueError):
     pass
 
 
-def save_with_thumb(image: Image.Image, path: Path) -> tuple[Path, Path]:
-    """Save a PNG original and a WebP thumbnail next to it; returns both paths."""
+def save_with_thumb(image: Image.Image, path: Path) -> tuple[Path, Path, Path]:
+    """Save the PNG original (downloads), a full-size WebP for viewing (~5x smaller) and a WebP thumbnail."""
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path, format="PNG", optimize=True)
+    preview_path = path.with_name(path.stem + "_preview.webp")
+    image.save(preview_path, format="WEBP", quality=90, method=4)
     thumb = image.copy()
     thumb.thumbnail((THUMB_SIDE, THUMB_SIDE))
     thumb_path = path.with_name(path.stem + "_thumb.webp")
     thumb.save(thumb_path, format="WEBP", quality=82)
-    return path, thumb_path
+    return path, preview_path, thumb_path
 
 
 def load_upload(data: bytes, max_bytes: int) -> Image.Image:

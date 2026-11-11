@@ -32,8 +32,9 @@ class ImageScores(BaseModel):
 
 class ImageVersion(BaseModel):
     id: str
-    url: str
+    url: str  # lossless PNG (downloads, exports)
     thumb_url: str
+    preview_url: str | None = None  # full-size WebP for on-screen viewing
     file: str = Field(description="path relative to the media directory")
     created_at: datetime = Field(default_factory=utcnow)
     mode: VersionMode
