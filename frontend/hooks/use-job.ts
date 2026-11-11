@@ -58,6 +58,10 @@ export function useJob(jobId: string | null, initialJob: Job | null = null) {
     everActive: initialJob ? isActive(initialJob) : false,
   });
 
+  // Only keep a live connection while work is in progress: an open stream (or polling) keeps a scale-to-zero
+  // backend awake. A finished storybook is fetched once; regenerating makes it active again and reconnects.
+  const active = state.job ? isActive(state.job) : true;
+
   useEffect(() => {
     if (!jobId) return;
 
@@ -128,12 +132,13 @@ export function useJob(jobId: string | null, initialJob: Job | null = null) {
     };
 
     void load();
-    connect();
+    if (active) connect();
+    else dispatch({ type: "connection", value: "idle" });
     return () => {
       disposed = true;
       stopAll();
     };
-  }, [jobId]);
+  }, [jobId, active]);
 
   /** Apply a Job returned by a mutation immediately (the SSE snapshot will follow). */
   const setJob = useCallback((job: Job) => dispatch({ type: "job", job }), []);

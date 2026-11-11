@@ -16,14 +16,15 @@ from app.schemas.story import CharacterProfile, Scene
 from app.services import appearance as kb
 from app.services.styles import GLOBAL_NEGATIVE, StyleSpec
 
-# canvas regions for masked multi-reference conditioning, with a small overlap between neighbours
+# Canvas regions for masked multi-reference conditioning. A gap between regions matters: with overlapping masks
+# the model draws one central figure and blends both references into a hybrid (see docs/MODELS.md, ablation).
 LAYOUTS: dict[int, list[tuple[Region, str]]] = {
     1: [(Region(x0=0, y0=0, x1=1, y1=1), "")],
-    2: [(Region(x0=0.0, y0=0, x1=0.56, y1=1), "on the left"), (Region(x0=0.44, y0=0, x1=1.0, y1=1), "on the right")],
+    2: [(Region(x0=0.0, y0=0, x1=0.45, y1=1), "on the left"), (Region(x0=0.55, y0=0, x1=1.0, y1=1), "on the right")],
     3: [
-        (Region(x0=0.0, y0=0, x1=0.38, y1=1), "on the left"),
-        (Region(x0=0.31, y0=0, x1=0.69, y1=1), "in the middle"),
-        (Region(x0=0.62, y0=0, x1=1.0, y1=1), "on the right"),
+        (Region(x0=0.0, y0=0, x1=0.30, y1=1), "on the left"),
+        (Region(x0=0.35, y0=0, x1=0.65, y1=1), "in the middle"),
+        (Region(x0=0.70, y0=0, x1=1.0, y1=1), "on the right"),
     ],
 }
 MAX_REFERENCED = 3
@@ -145,7 +146,8 @@ class PromptBuilder:
                 else "single character"
             )
         prompt = _clean(", ".join(p for p in parts if p))
-        scale = s.ip_adapter_scale + (0.1 if len(slots) > 1 else 0.0)
+        # several references at full strength over-impose the anchors' poses; moderate strength keeps identities
+        scale = s.ip_adapter_scale - (0.1 if len(slots) > 1 else 0.0)
         return BuiltPrompt(prompt=prompt, negative_prompt=self.negative(), slots=slots, ip_adapter_scale=scale)
 
     def anchor_prompt(self, character: CharacterProfile, from_upload: bool = False) -> BuiltPrompt:

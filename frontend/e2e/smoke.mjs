@@ -34,6 +34,9 @@ try {
   step(`open ${BASE}`);
   await page.goto(BASE, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /Generate Story/i }).waitFor({ timeout: 30_000 });
+  // wait until React has hydrated (the health check has run), otherwise early clicks are lost
+  await page.waitForFunction(() => document.querySelector('[aria-label="5 scenes"]') !== null, null, { timeout: 30_000 });
+  await sleep(1500);
   await shot("01-home");
 
   step("fill the example story and choose options");
@@ -43,6 +46,7 @@ try {
   await page.getByText("Watercolor", { exact: true }).first().click();
   await page.getByLabel("5 scenes").click();
   await page.getByLabel("Aspect ratio 4:3").click();
+  if ((await page.getByLabel("5 scenes").getAttribute("data-state")) !== "on") throw new Error("scene count not selected");
   await shot("02-form-filled");
 
   const health = await apiJson("/api/health");

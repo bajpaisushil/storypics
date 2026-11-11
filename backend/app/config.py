@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     # and cap how many jobs may be queued/running at once (0 = unlimited).
     access_key: str | None = None
     max_active_jobs: int = Field(default=0, ge=0)
+    # Free compute included in the hosting plan each month (Modal Starter: $30), shown as a meter in the web app.
+    monthly_credit_usd: float = 30.0
     max_story_chars: int = 6000
     max_upload_mb: int = 10
     max_scenes: int = 12

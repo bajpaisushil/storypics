@@ -1,4 +1,4 @@
-import type {
+import type { UsageReport,
   CreateJobRequest,
   Health,
   Job,
@@ -77,6 +77,7 @@ const json = (body: unknown): RequestInit => ({ method: "POST", body: JSON.strin
 
 export const api = {
   health: () => request<Health>("/api/health"),
+  usage: () => request<UsageReport>("/api/usage"),
   styles: () => request<StyleInfo[]>("/api/styles"),
   listJobs: () => request<JobSummary[]>("/api/jobs"),
   getJob: (id: string) => request<Job>(`/api/jobs/${id}`),

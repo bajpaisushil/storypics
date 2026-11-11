@@ -3,6 +3,9 @@ from fastapi import APIRouter, Depends
 from app.api.deps import get_manager
 from app.services.job_manager import JobManager
 from app.services.styles import STYLES
+from app.services.usage import UsageReport, UsageTracker
+
+_usage: UsageTracker | None = None
 
 router = APIRouter(prefix="/api", tags=["system"])
 
@@ -26,3 +29,13 @@ async def health(manager: JobManager = Depends(get_manager)) -> dict:
 @router.get("/styles", summary="Illustration styles")
 async def styles() -> list[dict]:
     return [s.public() for s in STYLES.values()]
+
+
+@router.get("/usage", response_model=UsageReport, summary="Hosted compute used this month (Modal)")
+async def usage(manager: JobManager = Depends(get_manager)) -> UsageReport:
+    global _usage
+    if _usage is None:
+        _usage = UsageTracker(manager.settings.monthly_credit_usd)
+    import asyncio
+
+    return await asyncio.to_thread(_usage.report)

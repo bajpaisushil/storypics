@@ -192,3 +192,9 @@ def test_hosted_frontend_can_reach_local_backend(settings, analyzer):
             "/api/jobs", headers={"Origin": "https://evil.example.com", "Access-Control-Request-Method": "POST"}
         )
         assert "access-control-allow-origin" not in evil.headers
+
+
+def test_usage_endpoint_outside_modal(make_client):
+    client, _ = make_client()
+    r = client.get("/api/usage").json()
+    assert r["provider"] == "none" and r["available"] is False

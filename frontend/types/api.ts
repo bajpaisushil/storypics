@@ -276,3 +276,18 @@ export interface StyleInfo {
 export type JobEvent =
   | { type: "job"; job: Job }
   | { type: "progress"; current: TaskProgress };
+
+/** GET /api/usage — hosted compute used this month (Modal free credits). */
+export interface UsageReport {
+  provider: "modal" | "none";
+  available: boolean;
+  month: string | null;
+  used_usd: number | null;
+  billed_usd: number | null;
+  free_credit_usd: number | null;
+  remaining_usd: number | null;
+  exhausted: boolean;
+  resets_on: string | null;
+  updated_at: string | null;
+  note: string | null;
+}
