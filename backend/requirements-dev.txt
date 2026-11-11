@@ -1,3 +1,4 @@
 -r requirements-train.txt
 pytest==9.2.0
 ruff
+modal  # deploy client for modal_app.py

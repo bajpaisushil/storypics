@@ -262,11 +262,16 @@ developer's machine. Free hosting has no GPU, so the design now has two image-ge
 | `lightning` / `quality` | SDXL + IP-Adapter Plus (SDXL) | Apple silicon / NVIDIA GPU you own | seconds per image | ~1 MP |
 | `lcm` | LCM-DreamShaper v7 (MIT) + IP-Adapter Plus (SD1.5) | any CPU, e.g. a free Hugging Face Space | tens of seconds per image | 512 px class |
 
-Deployment: **Vercel** serves the static Next.js app (built from GitHub); a **free Hugging Face Space** (Docker,
-CPU basic: 2 vCPU, 16 GB RAM) runs the FastAPI backend, the four custom models and the `lcm` image profile. Weights
-download inside the Space at first start. Public-deployment settings: the Stable Diffusion safety checker is on,
-automatic re-draws are off (they would double the wait on a CPU) and at most two storybooks run at once.
+Deployment: **Vercel** serves the static Next.js app (built from GitHub). **Modal** runs the FastAPI backend and the
+four custom models in one container that scales to zero (`modal_app.py`); weights live in a Modal Volume, jobs and
+images in a second one. Modal requires a payment method for any GPU, even within the free credits, so the live demo
+runs the CPU `lcm` profile on 8 vCPUs (no card needed); `modal deploy modal_app.py` without
+`STORYPIX_MODAL_GPU=none` switches the same code to SDXL-Lightning on a T4. Public-deployment settings: the Stable
+Diffusion safety checker screens every image, and at most two storybooks run at once.
 
-Alternatives considered: HF ZeroGPU (fast, but needs a paid PRO account), free notebook GPUs (sessions expire and
-serving a public API conflicts with their terms), external image APIs (paid, or not our own PyTorch pipeline), and
-other free container hosts (512 MB–1 GB RAM, too small for PyTorch).
+The first target was a free Hugging Face Space (CPU, `lcm` profile). Hugging Face now requires a paid PRO plan for
+Docker and Gradio Spaces, even on CPU hardware, so that path was dropped; `Dockerfile` and `scripts/deploy_space.py`
+remain for any CPU Docker host. Other options considered: HF ZeroGPU (paid PRO), free notebook GPUs (sessions expire
+and serving a public API conflicts with their terms), external image APIs (paid, or not our own PyTorch pipeline),
+free container hosts (512 MB–1 GB RAM, too small for PyTorch) and Oracle Cloud's free ARM VM (CPU-only, more ops).
+Modal's free monthly credits cover a demo; the per-second GPU billing and scale-to-zero keep idle cost at zero.

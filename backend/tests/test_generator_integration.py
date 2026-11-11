@@ -28,8 +28,9 @@ def generator():
         device="cpu",
         quality_steps=2,
         allow_downloads=True,
-        enable_ip_adapter=False,
-    )  # the real IP-Adapter does not fit the tiny test UNet
+        enable_ip_adapter=False,  # the real IP-Adapter does not fit the tiny test UNet
+        safety_checker=False,  # plumbing test: no 1.2 GB classifier download
+    )
     gen = LocalDiffusersGenerator(settings)
     gen.load()
     return gen

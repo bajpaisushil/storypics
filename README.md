@@ -41,25 +41,33 @@ Story ──▶ event units ──▶ Model A: scene boundaries ──▶ scenes
 - **Production workflow.** Asynchronous jobs with SQLite persistence, live progress over Server-Sent Events,
   cancel/resume, per-scene regeneration with version history, and reproducible seeds and manifests.
 
-## Deployment (free)
+## Deployment (free tier)
 
 | Part | Where | Notes |
 |---|---|---|
-| Web app (Next.js) | Vercel, deployed from this GitHub repo (root directory `frontend`) | static; `NEXT_PUBLIC_API_URL` points at the backend |
-| Backend + all models | free Hugging Face Space, Docker SDK, CPU basic (2 vCPU, 16 GB) | `backend/Dockerfile`; deploy with `python scripts/deploy_space.py` |
+| Web app (Next.js) | Vercel, deployed from this GitHub repo on every push to `main` (root directory `frontend`) | static; `NEXT_PUBLIC_API_URL` points at the backend |
+| Backend + all models | [Modal](https://modal.com) (`backend/modal_app.py`): one container that scales to zero | billed per second only while running, inside Modal's free monthly credits |
 
-Nothing heavy is installed on a developer's machine. The Space downloads its model weights (≈ 8 GB) on Hugging
-Face's own infrastructure at first start. The trade-off is speed: a free CPU draws each 512 px image in tens of
-seconds rather than seconds (measured numbers in [PERFORMANCE.md](docs/PERFORMANCE.md)). A free Space also sleeps
-when idle, so the first visit after a while waits for it to wake; the web app says so instead of failing.
+Nothing heavy is installed on a developer's machine. The backend image is built on Modal, and model weights download
+into a Modal Volume on first start. The container shuts down after 4 idle minutes; the first request after an idle
+period waits for it to start (about a minute), and the web app says so instead of failing.
+
+Two backend modes, chosen at deploy time:
+
+| Mode | Command | Images | Needs |
+|---|---|---|---|
+| CPU (current live demo) | `STORYPIX_MODAL_GPU=none modal deploy modal_app.py` | LCM-DreamShaper v7, 512 px, slower | free Modal account |
+| GPU | `modal deploy modal_app.py` (T4) | SDXL-Lightning + IP-Adapter, ~1 MP, fast | a payment method on the Modal account (Modal requires one for any GPU, even when usage stays within the free credits; set a workspace budget) |
 
 To deploy your own copy:
 
 ```bash
-cd backend && .venv/bin/hf auth login                     # a Hugging Face token with write access
-.venv/bin/python scripts/deploy_space.py --cors-regex 'https://<your-vercel-project>.*\.vercel\.app'
-# then import the GitHub repo in Vercel: root directory "frontend", NEXT_PUBLIC_API_URL=<the printed API URL>
+cd backend && .venv/bin/modal setup                         # once: log in to Modal in the browser
+STORYPIX_MODAL_GPU=none .venv/bin/modal deploy modal_app.py # prints the backend URL
+# then import the GitHub repo in Vercel: root directory "frontend", NEXT_PUBLIC_API_URL=<that URL>
 ```
+
+`backend/Dockerfile` packages the same CPU profile for any other Docker host.
 
 ## Run it locally (optional; needs a GPU or Apple silicon)
 
@@ -102,7 +110,8 @@ cd backend
 | Apple silicon, 16 GB (M1–M4) | ✅ primary target | SDXL + Lightning (8 steps) on MPS; see [PERFORMANCE.md](docs/PERFORMANCE.md) for measured speed and memory |
 | Apple silicon, 8 GB | ⚠️ | set `STORYPIX_IMAGE_RESOLUTION=768` and `STORYPIX_LIGHTNING_STEPS=4`; expect memory swapping |
 | NVIDIA ≥ 12 GB VRAM | ✅ | defaults to the "quality" profile (28 steps, CFG, negative prompts) |
-| CPU-only server (e.g. free HF Space, 2 vCPU / 16 GB) | ✅ deployment target | `lcm` profile: LCM-DreamShaper v7, 4 steps, 512 px, IP-Adapter Plus SD1.5, safety checker |
+| Cloud CPU (Modal, 8 vCPU / 16 GB — the live demo) | ✅ | `lcm` profile: LCM-DreamShaper v7, 4 steps, 512 px, IP-Adapter Plus SD1.5, safety checker |
+| Cloud GPU (Modal T4/L4) | ✅ | `lightning` profile with the safety checker (needs a payment method on Modal) |
 | CPU-only laptop | ⚠️ | the `lcm` profile works, but SDXL profiles take minutes per image |
 | No suitable GPU | ✅ notebook | [`notebooks/StoryPix_free_GPU.ipynb`](notebooks/StoryPix_free_GPU.ipynb) runs the batch pipeline on a free Colab/Kaggle T4 |
 
@@ -144,8 +153,9 @@ backend/
   training/       dataset download/preparation, training scripts, evaluate.py, annotations/ (gold sets)
   checkpoints/    trained weights + metrics + evaluation reports
   worker/         optional generation worker for a GPU machine you own
-  scripts/        model download, Hugging Face Space deployment
-  Dockerfile      CPU image used by the Space
+  scripts/        model download, Hugging Face Space deployment (CPU alternative)
+  modal_app.py    Modal deployment (CPU or GPU) — the hosted backend
+  Dockerfile      CPU-only image for any Docker host
   tests/          pytest: models, pipeline stages, API workflow
 frontend/         Next.js 16 · TypeScript · Tailwind · shadcn/ui
 notebooks/        free-GPU batch notebook
@@ -171,8 +181,9 @@ unavailable, generation requests fail with an explanation of how to fix it.
   crowded scenes, are harder. Masked IP-Adapter conditioning assumes a left/right/thirds layout.
 - Story understanding is tuned for narrative fiction in English, especially children's stories.
 - Gold evaluation sets are small and single-annotated (see `backend/training/annotations/README.md`).
-- The free CPU deployment is slow (tens of seconds per image) and its 512 px LCM-DreamShaper output is less detailed
-  than SDXL; a free Space sleeps when idle and loses generated storybooks when it restarts (no persistent disk).
+- The live demo runs on a CPU (no payment method needed), so its 512 px LCM-DreamShaper images are slower and less
+  detailed than the SDXL images the same code produces on a GPU. The backend scales to zero, so the first visit after
+  an idle period waits about a minute for it to start.
 - Models C and D were trained on a 1,018-image subset of ImageRewardDB; treat their scores as indicative.
 - Generated images follow the use restrictions of the CreativeML OpenRAIL licences.
 

@@ -28,3 +28,5 @@ next-env.d.ts
 .idea/
 .vscode/
 *.swp
+.env*
+!.env.example

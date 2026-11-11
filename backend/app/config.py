@@ -6,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     # quality   = SDXL, 28 steps, CFG + negative prompts — default on CUDA GPUs
     # lcm       = LCM-DreamShaper v7 (SD1.5 family, 4 steps, 512 px) — default on CPU-only servers
     profile: Literal["auto", "lightning", "quality", "lcm"] = "auto"
-    lightning_steps: Literal[4, 8] = 8
+    lightning_steps: int = 8  # 4 or 8 (the published SDXL-Lightning LoRAs)
     quality_steps: int = 28
     base_model: str = "stabilityai/stable-diffusion-xl-base-1.0"
     base_variant: str | None = "fp16"
@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     lcm_model: str = "SimianLuo/LCM_Dreamshaper_v7"  # MIT licence
     lcm_steps: int = Field(default=4, ge=1, le=12)
     lcm_guidance: float = 8.0
-    safety_checker: bool = True  # SD1.5-family profile: discard images flagged as unsafe (public deployments)
+    safety_checker: bool = True  # discard images the Stable Diffusion safety checker flags (when its weights exist)
     torch_threads: int = 0  # CPU threads for PyTorch (0 = library default)
     enable_ip_adapter: bool = True  # character reference conditioning (needs the IP-Adapter weights)
     # Never download multi-GB weights implicitly at request time; run scripts/download_models.py.
@@ -75,6 +75,14 @@ class Settings(BaseSettings):
     # --- NLP ---------------------------------------------------------------------------------
     text_encoder: str = "sentence-transformers/all-MiniLM-L6-v2"
     spacy_model: str = "en_core_web_sm"
+
+    @field_validator("lightning_steps")
+    @classmethod
+    def _lightning_steps(cls, v: int) -> int:
+        # an int field (not Literal[4, 8]) so values from environment variables, which arrive as text, validate
+        if v not in (4, 8):
+            raise ValueError("lightning_steps must be 4 or 8")
+        return v
 
     @property
     def media_dir(self) -> Path:

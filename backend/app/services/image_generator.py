@@ -174,6 +174,9 @@ SD15_PATTERNS = [
     "vae/diffusion_pytorch_model.safetensors",
 ]
 SAFETY_PATTERNS = ["safety_checker/config.json", "safety_checker/model.safetensors"]
+# SDXL ships no safety checker; the Stable Diffusion one is a CLIP-based image classifier that works on any image.
+SAFETY_REPO = "stable-diffusion-v1-5/stable-diffusion-v1-5"  # CreativeML OpenRAIL-M
+SAFETY_REPO_PATTERNS = ["safety_checker/config.json", "safety_checker/model.safetensors", "feature_extractor/*"]
 SDXL_PATTERNS = [
     "model_index.json",
     "scheduler/*",
@@ -203,6 +206,7 @@ class LocalDiffusersGenerator:
         self.profile: str | None = None
         self._ip_loaded = False
         self._gray = Image.new("RGB", (224, 224), (128, 128, 128))
+        self._safety = None  # (checker, feature_extractor) for SDXL; the SD1.5 pipeline has its own
 
     # -- configuration ------------------------------------------------------------------------------
     def _resolve_profile(self) -> str:
@@ -316,6 +320,8 @@ class LocalDiffusersGenerator:
                 snapshot_download(s.vae_model, allow_patterns=["config.json", "diffusion_pytorch_model.safetensors"])
             if self._resolve_profile() == "lightning":
                 snapshot_download(s.lightning_repo, allow_patterns=[self._lightning_file()])
+            if s.safety_checker:
+                snapshot_download(SAFETY_REPO, allow_patterns=SAFETY_REPO_PATTERNS)
             ip = [f"sdxl_models/{s.ip_adapter_weight}", "models/image_encoder/*"]
         if s.enable_ip_adapter:
             snapshot_download(s.ip_adapter_repo, allow_patterns=ip)
@@ -347,6 +353,8 @@ class LocalDiffusersGenerator:
         else:
             log.warning("IP-Adapter weights missing — generating without character reference conditioning")
         pipe.to(self.device)
+        if self.family == "sdxl" and s.safety_checker:
+            self._safety = self._load_safety_checker(dtype)
         if s.attention_slicing:
             pipe.enable_attention_slicing()
         pipe.set_progress_bar_config(disable=True)
@@ -358,6 +366,32 @@ class LocalDiffusersGenerator:
             time.perf_counter() - t0,
         )
         return pipe
+
+    def _load_safety_checker(self, dtype):
+        """Optional for SDXL: used when its files are available (always on the public deployment)."""
+        from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
+        from transformers import CLIPImageProcessor
+
+        if not self._present(SAFETY_REPO, "safety_checker/model.safetensors"):
+            log.warning("safety checker weights not available — SDXL images are not screened")
+            return None
+        checker = StableDiffusionSafetyChecker.from_pretrained(
+            SAFETY_REPO, subfolder="safety_checker", dtype=dtype, local_files_only=True
+        ).to(self.device)
+        extractor = CLIPImageProcessor.from_pretrained(
+            SAFETY_REPO, subfolder="feature_extractor", local_files_only=True
+        )
+        return checker, extractor
+
+    def _flagged_by_safety_checker(self, image: Image.Image) -> bool:
+        import numpy as np
+        import torch
+
+        checker, extractor = self._safety
+        clip_input = extractor(images=[image], return_tensors="pt").pixel_values.to(self.device, checker.dtype)
+        with torch.no_grad():
+            _, flagged = checker(images=np.asarray(image, dtype=np.float32)[None] / 255.0, clip_input=clip_input)
+        return bool(flagged[0])
 
     def _build_sd15(self, dtype):
         from diffusers import DiffusionPipeline, LCMScheduler
@@ -486,10 +520,10 @@ class LocalDiffusersGenerator:
                 callback_on_step_end=on_step,
                 **kwargs,
             )
-        flagged = getattr(result, "nsfw_content_detected", None)
-        if flagged and flagged[0]:
-            raise GenerationBlocked("The safety filter blocked this image. Try regenerating, or reword the scene.")
         image = result.images[0]
+        flagged = getattr(result, "nsfw_content_detected", None)
+        if (flagged and flagged[0]) or (self._safety is not None and self._flagged_by_safety_checker(image)):
+            raise GenerationBlocked("The safety filter blocked this image. Try regenerating, or reword the scene.")
         duration = time.perf_counter() - t0
         peak = None
         if self.device == "mps":
